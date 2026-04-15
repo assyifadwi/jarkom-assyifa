@@ -59,7 +59,6 @@ http://gaia.cs.umass.edu/wireshark-labs/protected_pages/HTTP-wireshark-file5.htm
 - Password: network  
 4. Menghentikan capture setelah berhasil masuk.  
 
----
 
 ## 4. Hasil dan Pembahasan
 
@@ -69,7 +68,6 @@ http://gaia.cs.umass.edu/wireshark-labs/protected_pages/HTTP-wireshark-file5.htm
 
 Browser mengirimkan permintaan HTTP ke server, kemudian server merespon dengan status **200 OK** yang menandakan permintaan berhasil diproses.
 
----
 
 ### 4.2 HTTP Conditional GET
 ![Clear Cache](assets/http-file2-clearcache.png)  
@@ -78,7 +76,6 @@ Browser mengirimkan permintaan HTTP ke server, kemudian server merespon dengan s
 
 Server memberikan respon **304 Not Modified**, yang berarti data tidak berubah sehingga browser menggunakan data dari cache.
 
----
 
 ### 4.3 Pengambilan Dokumen Besar
 ![Halaman](assets/http-file3-page.png)  
@@ -86,7 +83,6 @@ Server memberikan respon **304 Not Modified**, yang berarti data tidak berubah s
 
 Dokumen dikirim dalam beberapa segmen karena ukuran file cukup besar, sehingga tidak dapat dikirim dalam satu paket.
 
----
 
 ### 4.4 HTML dengan Embedded Objects
 ![Halaman](assets/http-file4-page.png)  
@@ -94,13 +90,12 @@ Dokumen dikirim dalam beberapa segmen karena ukuran file cukup besar, sehingga t
 
 Browser mengirim beberapa request HTTP untuk mengambil setiap objek (gambar/elemen) yang ada pada halaman web.
 
----
 
 ### 4.5 HTTP Authentication
-![Login](assets/http-file5-login.png)  
+![Login](assets/http-file5-login.png)
+![Hasil](assets/http-file5-auth-result.png)    
 ![Capture](assets/http-file5-capture.png)  
-![Filter](assets/http-auth-filter.png)  
-![Hasil](assets/http-auth-result.png)  
+
 
 Terlihat adanya header **Authorization: Basic** yang berisi informasi login dalam bentuk encoding Base64. Data ini masih dapat dikembalikan ke bentuk asli sehingga kurang aman tanpa penggunaan HTTPS.
 
