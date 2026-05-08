@@ -1,67 +1,53 @@
-# Analisis Protokol UDP Menggunakan Wireshark
+# Laporan Praktikum Jaringan Komputer
+## Modul 5: Analisis Protokol UDP
 
-# Tujuan Praktikum
 
-Praktikum ini bertujuan untuk memahami cara kerja protokol UDP menggunakan aplikasi Wireshark. Selain itu, praktikum dilakukan untuk mengamati struktur header UDP, hubungan antar port, serta proses pengiriman dan penerimaan paket UDP pada jaringan komputer.
+## 1. Tujuan Praktikum
 
----
+1. Memahami cara kerja protokol UDP menggunakan Wireshark.  
+2. Mengidentifikasi field-field yang terdapat pada header UDP.  
+3. Menganalisis hubungan antara paket UDP request dan response.  
 
-# 5.1 Pengantar
 
-UDP atau User Datagram Protocol merupakan salah satu protokol transport yang digunakan untuk mengirim data tanpa membangun koneksi terlebih dahulu. Berbeda dengan TCP, UDP bersifat connectionless sehingga proses pengiriman data menjadi lebih cepat dan sederhana.
+## 2. Alat dan Bahan
 
-Karena tidak menggunakan mekanisme handshake maupun pengecekan reliabilitas yang kompleks, UDP sering digunakan pada layanan yang membutuhkan kecepatan tinggi seperti streaming, DNS, VoIP, game online, dan SNMP.
+- Wireshark  
+- File trace UDP (`http-ethereal-trace-5.pcap`)  
+- Komputer/Laptop  
 
-Karakteristik UDP:
 
-* Tidak menggunakan koneksi.
-* Tidak menjamin paket diterima.
-* Header lebih sederhana.
-* Overhead kecil.
-* Pengiriman data lebih cepat.
+## 3. Langkah Percobaan
 
-Pada praktikum ini dilakukan analisis paket UDP menggunakan Wireshark untuk melihat struktur header, ukuran field, nomor port, serta hubungan antar paket UDP.
-
----
-
-# 5.2 Analisis Paket UDP
-
-Pada praktikum ini dilakukan proses capture paket menggunakan Wireshark, kemudian dilakukan filter agar hanya paket UDP yang ditampilkan.
-
-Filter yang digunakan:
+1. Menjalankan aplikasi Wireshark.  
+2. Membuka file trace UDP `http-ethereal-trace-5.pcap`.  
+3. Menggunakan filter:
 
 ```bash
 udp
-```
+````
 
-Setelah paket UDP ditemukan, salah satu paket dipilih untuk dianalisis.
+4. Setelah paket UDP ditemukan, salah satu paket dipilih untuk dianalisis.
 
 ![Capture Paket UDP](assets/assets0.png)
 
----
+## 4. Hasil dan Pembahasan
 
-# Pembahasan Pertanyaan
+### 4.1 Field pada Header UDP
 
-## 1. Field pada Header UDP
-
-Berdasarkan hasil analisis di Wireshark, terdapat empat field utama pada header UDP:
+![Capture Field UDP](assets/assets1.png)
+Berdasarkan hasil pengamatan pada Wireshark, header UDP memiliki 4 field utama, yaitu:
 
 1. Source Port
 2. Destination Port
 3. Length
 4. Checksum
 
-![Header UDP](assets/assets1.png)
+Keempat field tersebut digunakan untuk mengatur proses komunikasi data pada protokol UDP.
 
-### Analisis
+### 4.2 Panjang Masing-Masing Field UDP
 
-Header UDP memiliki struktur yang sederhana dibandingkan TCP. Karena hanya terdiri dari empat field utama, ukuran header UDP menjadi lebih kecil sehingga proses pengiriman data menjadi lebih ringan.
-
-Field Source Port menunjukkan port pengirim, sedangkan Destination Port menunjukkan port tujuan. Field Length menunjukkan ukuran total segmen UDP, dan Checksum digunakan untuk mendeteksi kesalahan data.
-
----
-
-## 2. Panjang Masing-Masing Field Header UDP
+![Capture Length](assets/assets2.png)
+Berdasarkan hasil pengamatan, panjang masing-masing field pada header UDP adalah:
 
 | Field            | Panjang |
 | ---------------- | ------- |
@@ -70,143 +56,89 @@ Field Source Port menunjukkan port pengirim, sedangkan Destination Port menunjuk
 | Length           | 2 byte  |
 | Checksum         | 2 byte  |
 
-Total ukuran header UDP:
+Sehingga total panjang header UDP adalah:
 
 ```text
-8 byte
+2 + 2 + 2 + 2 = 8 byte
 ```
 
-![Ukuran Header UDP](assets/asset3.png)
+### 4.3 Analisis Field Length
+![Capture Field Length](assets/assets3.png)
+![Capture Field Length](assets/assets4.png)
+Field `Length` pada UDP menunjukkan total panjang segmen UDP, yaitu gabungan antara header UDP dan payload UDP.
 
-### Analisis
+Pada paket yang diamati diperoleh:
 
-Setiap field pada header UDP memiliki ukuran 16 bit atau 2 byte. Karena terdapat empat field, total panjang header UDP adalah 8 byte.
+* Length = 58 byte
+* UDP Payload = 50 byte
 
----
-
-## 3. Fungsi Field Length
-
-Field Length pada UDP menunjukkan total ukuran segmen UDP yang terdiri dari:
+Maka:
 
 ```text
-Header UDP + Payload/Data
+58 - 50 = 8 byte
 ```
 
-![Field Length](assets/asset4.png)
+Dapat disimpulkan bahwa:
 
-### Contoh
+* Header UDP = 8 byte
+* Payload UDP = 50 byte
 
-Jika panjang payload adalah 32 byte dan header UDP 8 byte, maka:
+### 4.4 Maksimum Payload UDP
+
+Field Length pada UDP memiliki ukuran 16 bit sehingga panjang maksimum segmen UDP adalah:
 
 ```text
-40 byte
+2^16 - 1 = 65535 byte
 ```
 
-### Analisis
-
-Field Length digunakan untuk menunjukkan ukuran keseluruhan segmen UDP yang dikirim.
-
----
-
-## 4. Maksimum Payload UDP
-
-Ukuran maksimum field Length UDP:
+Karena header UDP selalu berukuran 8 byte, maka maksimum payload UDP adalah:
 
 ```text
-65535 byte
+65535 - 8 = 65527 byte
 ```
 
-Ukuran header UDP:
+### 4.5 Nomor Port Maksimum
+
+Nomor port UDP menggunakan field 16 bit sehingga nomor port terbesar yang dapat digunakan adalah:
 
 ```text
-8 byte
+2^16 - 1 = 65535
 ```
 
-Maka maksimum payload UDP:
-
-```text
-65527 byte
-```
-
-### Analisis
-
-Payload maksimum UDP adalah 65527 byte. Namun pada praktik jaringan nyata biasanya ukuran paket dibatasi oleh MTU agar tidak terjadi fragmentasi.
-
----
-
-## 5. Nomor Port Maksimum UDP
-
-Nomor port terbesar yang dapat digunakan:
-
-```text
-65535
-```
-
-### Analisis
-
-Karena field port UDP memiliki ukuran 16 bit, maka rentang port berada pada 0 sampai 65535.
-
-| Jenis Port      | Rentang       |
-| --------------- | ------------- |
-| Well Known Port | 0 – 1023      |
-| Registered Port | 1024 – 49151  |
-| Dynamic Port    | 49152 – 65535 |
-
----
-
-## 6. Nomor Protokol UDP
+### 4.6 Nomor Protokol UDP
+![Capture No Protokol](assets/assets5.png)
+Berdasarkan hasil pengamatan pada header IP, nomor protokol UDP adalah:
 
 | Format       | Nilai |
 | ------------ | ----- |
 | Desimal      | 17    |
 | Heksadesimal | 0x11  |
 
-![Protocol UDP](assets/asset5.png)
+Nilai tersebut dapat dilihat pada bagian:
 
-### Analisis
+```text
+Protocol: UDP (17)
+```
 
-Field Protocol pada header IP digunakan untuk menunjukkan protokol layer transport yang digunakan. Nilai 17 menunjukkan bahwa datagram IP membawa segmen UDP.
+### 4.7 Hubungan Port pada Paket Request dan Response
+![Capture Request Port](assets/assets6.png)
+![Capture Request Port](assets/assets7.png)
+Pada paket request diperoleh:
 
----
+```text
+Source Port: 4334
+Destination Port: 161
+```
 
-## 7. Hubungan Nomor Port pada Paket UDP
+Sedangkan pada paket response diperoleh:
 
-Contoh pasangan request dan response:
+```text
+Source Port: 161
+Destination Port: 4334
+```
 
-| Paket    | Source Port | Destination Port |
-| -------- | ----------- | ---------------- |
-| Request  | 54000       | 53               |
-| Response | 53          | 54000            |
+Hal ini menunjukkan bahwa source port dan destination port pada paket response merupakan kebalikan dari paket request. Destination port pada paket pertama menjadi source port pada paket balasan, sedangkan source port pada paket pertama menjadi destination port pada paket balasan.
 
-![Request dan Response UDP](assets/asset6.png)
+## 5. Kesimpulan
 
-### Analisis
-
-Pada paket request, client menggunakan source port acak dan destination port menuju layanan tertentu, misalnya port 53 untuk DNS.
-
-Ketika server mengirim response, nomor port akan saling bertukar sehingga paket balasan dapat dikirim kembali ke aplikasi pengirim yang benar.
-
----
-
-# Kesimpulan
-
-Berdasarkan hasil praktikum, dapat diketahui bahwa UDP merupakan protokol transport yang sederhana dan bersifat connectionless. UDP tidak menggunakan mekanisme handshake maupun retransmission sehingga proses pengiriman data menjadi lebih cepat dibandingkan TCP.
-
-Header UDP hanya memiliki empat field utama dengan total ukuran header sebesar 8 byte sehingga overhead protokol menjadi kecil.
-
-Dari hasil analisis Wireshark juga terlihat bahwa UDP menggunakan protocol number 17 pada header IP dan memanfaatkan nomor port untuk proses komunikasi antara client dan server.
-
-Dengan demikian, UDP cocok digunakan pada layanan jaringan yang membutuhkan kecepatan tinggi dan latensi rendah.
-
----
-
-# Daftar Screenshot
-
-| File       | Keterangan                  |
-| ---------- | --------------------------- |
-| asset1.png | Capture paket UDP           |
-| asset2.png | Header UDP                  |
-| asset3.png | Ukuran header UDP           |
-| asset4.png | Field Length UDP            |
-| asset5.png | Protocol UDP pada IP Header |
-| asset6.png | Request dan response UDP    |
+Berdasarkan hasil praktikum, protokol UDP merupakan protokol transport yang sederhana dan tidak menggunakan mekanisme koneksi maupun pengiriman ulang data. Header UDP terdiri dari empat field utama yaitu Source Port, Destination Port, Length, dan Checksum dengan total ukuran header sebesar 8 byte. Melalui Wireshark, proses pertukaran paket UDP dapat diamati secara detail termasuk hubungan antara paket request dan response serta penggunaan nomor port pada komunikasi jaringan.
