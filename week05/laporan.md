@@ -64,7 +64,9 @@ Sehingga total panjang header UDP adalah:
 
 ### 4.3 Analisis Field Length
 ![Capture Field Length](assets/assets3.png)
+<br>
 ![Capture Field Length](assets/assets4.png)
+<br>
 Field `Length` pada UDP menunjukkan total panjang segmen UDP, yaitu gabungan antara header UDP dan payload UDP.
 
 Pada paket yang diamati diperoleh:
@@ -121,21 +123,14 @@ Protocol: UDP (17)
 ```
 
 ### 4.7 Hubungan Port pada Paket Request dan Response
-![Capture Request Port](assets/assets6.png)
-![Capture Request Port](assets/assets7.png)
+
 Pada paket request diperoleh:
 
-```text
-Source Port: 4334
-Destination Port: 161
-```
+![Capture Request Port](assets/assets6.png)
 
 Sedangkan pada paket response diperoleh:
 
-```text
-Source Port: 161
-Destination Port: 4334
-```
+![Capture Request Port](assets/assets7.png)
 
 Hal ini menunjukkan bahwa source port dan destination port pada paket response merupakan kebalikan dari paket request. Destination port pada paket pertama menjadi source port pada paket balasan, sedangkan source port pada paket pertama menjadi destination port pada paket balasan.
 
