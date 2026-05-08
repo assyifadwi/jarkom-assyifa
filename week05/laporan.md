@@ -36,7 +36,7 @@ udp
 
 Setelah paket UDP ditemukan, salah satu paket dipilih untuk dianalisis.
 
-![Capture Paket UDP](assets/asset1.png)
+![Capture Paket UDP](assets/assets0.png)
 
 ---
 
@@ -51,7 +51,7 @@ Berdasarkan hasil analisis di Wireshark, terdapat empat field utama pada header 
 3. Length
 4. Checksum
 
-![Header UDP](assets/asset2.png)
+![Header UDP](assets/assets1.png)
 
 ### Analisis
 
