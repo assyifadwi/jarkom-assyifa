@@ -1,4 +1,3 @@
-````md id="kzgr6v"
 # Laporan Praktikum Jaringan Komputer
 ## Modul 10: Internet Protocol (IP)
 
