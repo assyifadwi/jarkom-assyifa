@@ -1,77 +1,105 @@
-# Analisis Protokol DNS Menggunakan Wireshark
+# Laporan Praktikum Jaringan Komputer
 
-# Tujuan Praktikum
+## Modul 4: Analisis dan Tracing DNS Menggunakan Wireshark
 
-Praktikum ini dilakukan untuk memahami cara kerja DNS serta menganalisis proses pertukaran paket DNS menggunakan aplikasi Wireshark. Selain itu, praktikum juga bertujuan untuk mempelajari penggunaan perintah `nslookup`, `ipconfig`, serta melihat bagaimana client melakukan request dan menerima response dari DNS server.
+## 1. Tujuan Praktikum
 
----
-
-# 4.1 Pengantar DNS
-
-DNS atau Domain Name System merupakan layanan yang digunakan untuk menerjemahkan nama domain menjadi alamat IP. Pengguna internet lebih mudah mengingat alamat seperti `www.google.com` dibandingkan alamat IP numerik, sehingga DNS berperan penting sebagai penerjemah antara nama domain dan alamat IP.
-
-Saat user mengakses sebuah website, komputer akan mengirimkan permintaan DNS ke server DNS lokal. Jika alamat domain belum tersedia pada cache, DNS server akan mencari informasi tersebut ke server DNS lainnya hingga menemukan alamat IP yang sesuai.
-
-Secara umum proses DNS berjalan dengan tahapan berikut:
-
-1. User memasukkan nama domain pada browser.
-2. Host memeriksa cache DNS lokal.
-3. Jika tidak tersedia, host mengirim DNS query.
-4. DNS server mencari record yang diminta.
-5. DNS server mengirimkan response.
-6. Host menggunakan IP hasil DNS untuk membangun koneksi.
+* Memahami cara kerja Domain Name System (DNS).
+* Menganalisis paket DNS menggunakan Wireshark.
+* Memahami penggunaan perintah `nslookup` dan `ipconfig`.
+* Mengidentifikasi proses DNS request dan DNS response pada jaringan komputer.
 
 ---
 
-# 4.2 Nslookup
+## 2. Alat dan Bahan
 
-`nslookup` adalah command line tool yang digunakan untuk melakukan query DNS secara manual. Perintah ini dapat digunakan untuk mencari alamat IP suatu domain, mencari DNS server otoritatif, maupun melihat mail server dari suatu domain.
+* Wireshark
+* Command Prompt / Terminal
+* Web Browser
+* Koneksi Internet
 
-Format umum perintah:
+---
+
+## 3. Langkah Percobaan
+
+## 3.1 Pengantar DNS
+
+DNS atau **Domain Name System** adalah layanan yang berfungsi menerjemahkan nama domain menjadi alamat IP. Dengan DNS, pengguna cukup mengetikkan nama domain seperti `www.mit.edu` atau `www.ietf.org`, lalu komputer akan meminta alamat IP domain tersebut ke DNS server.
+
+Secara umum, alur kerja DNS adalah sebagai berikut:
+
+1. Client mengakses nama domain.
+2. Client memeriksa cache DNS lokal.
+3. Jika tidak tersedia di cache, client mengirim DNS query ke DNS server.
+4. DNS server mengembalikan DNS response.
+5. Client memakai IP hasil DNS untuk membuat koneksi ke server tujuan.
+
+---
+
+## 3.2 Nslookup
+
+`nslookup` digunakan untuk melakukan query DNS secara manual melalui Command Prompt. Sintaks umum perintahnya adalah:
 
 ```bash
-nslookup [opsi] [domain] [dns-server]
+nslookup [option] [host-to-find] [dns-server]
 ```
 
-Jika DNS server tidak ditentukan, maka komputer akan memakai DNS server default.
+Jika DNS server tidak ditentukan, maka query akan dikirim ke DNS server default milik komputer.
 
 ---
 
-## 4.2.1 Percobaan Dasar Nslookup
+### 3.2.1 Percobaan Dasar Nslookup
 
-### 1. Mencari alamat IP dari `www.mit.edu`
+#### 1. Query alamat IP `www.mit.edu`
+
+Perintah:
 
 ```bash
 nslookup www.mit.edu
 ```
 
-![Hasil nslookup MIT](assets/asset1.png)
+![Hasil nslookup www.mit.edu](assets/asset1.png)
 
-### Analisis
+**Hasil dan analisis:**
 
-Perintah tersebut digunakan untuk memperoleh alamat IP dari domain `www.mit.edu`. Query DNS dikirim ke DNS server default yang digunakan komputer. Response yang diterima biasanya berisi nama domain beserta alamat IP tujuan.
+Perintah `nslookup www.mit.edu` digunakan untuk mencari alamat IP dari domain `www.mit.edu`. Berdasarkan screenshot, DNS server yang digunakan adalah server default pada host. Hasil query menunjukkan bahwa domain `www.mit.edu` memiliki beberapa alamat IP, yaitu alamat IPv4 dan IPv6.
 
-Jika muncul lebih dari satu alamat IP, hal tersebut menunjukkan bahwa domain menggunakan beberapa server atau memanfaatkan sistem load balancing.
+Adanya lebih dari satu IP menunjukkan bahwa domain tersebut dapat menggunakan beberapa server atau mekanisme distribusi beban.
 
 ---
 
-### 2. Mencari DNS Server Otoritatif
+#### 2. Query DNS otoritatif domain `mit.edu`
+
+Perintah:
 
 ```bash
 nslookup -type=NS mit.edu
 ```
 
-![Hasil nslookup NS](assets/asset2.png)
+![Hasil nslookup type NS mit.edu](assets/asset2.png)
 
-### Analisis
+**Hasil dan analisis:**
 
-Opsi `-type=NS` dipakai untuk meminta record Name Server. Hasil query menampilkan daftar DNS server yang bertanggung jawab terhadap domain `mit.edu`.
+Perintah `-type=NS` digunakan untuk meminta record **Name Server**. Dari hasil screenshot, domain `mit.edu` memiliki beberapa name server, seperti:
 
-Jika response bertuliskan *Non-authoritative answer*, berarti jawaban berasal dari cache DNS lokal dan bukan langsung dari authoritative server.
+```text
+ns1-173.akam.net
+use5.akam.net
+usw2.akam.net
+asia2.akam.net
+ns1-37.akam.net
+use2.akam.net
+use5.akam.net
+asia1.akam.net
+```
+
+Jawaban bersifat **Non-authoritative answer**, artinya response berasal dari cache DNS resolver, bukan langsung dari authoritative DNS server MIT.
 
 ---
 
-### 3. Query Menggunakan DNS Server Tertentu
+#### 3. Query menggunakan DNS server tertentu
+
+Perintah:
 
 ```bash
 nslookup www.aiit.or.kr bitsy.mit.edu
@@ -79,478 +107,428 @@ nslookup www.aiit.or.kr bitsy.mit.edu
 
 ![Hasil nslookup custom DNS](assets/asset3.png)
 
-### Analisis
+**Hasil dan analisis:**
 
-Pada percobaan ini, request DNS dikirim langsung ke server `bitsy.mit.edu`, bukan menggunakan DNS default. Tujuannya untuk melihat bagaimana DNS query dapat dilakukan melalui server tertentu.
-
-Apabila server tujuan tidak menerima recursive query dari luar jaringan, kemungkinan response akan berupa timeout atau request refused.
+Pada percobaan ini, query diarahkan ke DNS server `bitsy.mit.edu`, bukan ke DNS server default. Berdasarkan screenshot, request mengalami timeout dan hasil akhirnya menunjukkan bahwa query ditolak atau tidak mendapatkan jawaban yang diharapkan. Hal ini dapat terjadi karena server DNS tujuan tidak mengizinkan recursive query dari jaringan luar.
 
 ---
 
-## 4.2.2 Percobaan Mandiri Nslookup
+### 3.2.2 Percobaan Mandiri Nslookup
 
-### 1. Mencari Alamat IP Web Server di Asia
+#### 1. Mendapatkan IP server web di Asia
+
+Perintah yang digunakan:
 
 ```bash
 nslookup www.u-tokyo.ac.jp
 ```
 
-![Hasil nslookup server Asia](assets/asset4.png)
-
-### Hasil
-
-```text
-[Isi hasil IP dari praktikum]
-```
-
-### Analisis
-
-Domain `www.u-tokyo.ac.jp` digunakan sebagai contoh web server di Asia. Secara default, `nslookup` akan meminta record tipe A untuk mendapatkan alamat IPv4 dari domain tersebut.
+Pada praktikum ini, server web Asia yang digunakan adalah domain Universitas Tokyo, yaitu `www.u-tokyo.ac.jp`. Query ini mencari record A/AAAA dari domain tersebut.
 
 ---
 
-### 2. Mencari DNS Otoritatif Universitas di Eropa
+#### 2. Mencari DNS otoritatif universitas di Eropa
+
+Perintah yang digunakan:
 
 ```bash
 nslookup -type=NS kth.se
 ```
 
-![Hasil DNS universitas Eropa](assets/asset5.png)
-
-### Hasil
-
-```text
-[Isi hasil name server]
-```
-
-### Analisis
-
-Record NS menunjukkan server DNS yang memiliki otoritas terhadap domain tertentu. Dari hasil query dapat diketahui server DNS mana saja yang bertanggung jawab terhadap domain `kth.se`.
+Record NS digunakan untuk mengetahui DNS server yang bertanggung jawab terhadap domain universitas di Eropa.
 
 ---
 
-### 3. Mencari Mail Server Yahoo
+#### 3. Mencari mail server Yahoo
+
+Perintah yang digunakan:
 
 ```bash
 nslookup -type=MX yahoo.com
 ```
 
-![Hasil MX Yahoo](assets/asset6.png)
-
-### Hasil
-
-```text
-[Isi hasil MX Yahoo]
-```
-
-### Analisis
-
-Record MX digunakan untuk mengetahui mail server yang menerima email untuk suatu domain. Pada hasil query biasanya akan muncul beberapa mail exchanger lengkap dengan prioritasnya.
+Record MX digunakan untuk mencari mail exchanger yang menerima email untuk domain Yahoo.
 
 ---
 
-# 4.3 Ipconfig
+## 3.3 Ipconfig
 
-Perintah `ipconfig` digunakan untuk melihat konfigurasi jaringan pada sistem operasi Windows. Informasi yang dapat dilihat antara lain alamat IP, gateway, DNS server, dan status adapter jaringan.
+`ipconfig` digunakan untuk melihat konfigurasi jaringan pada Windows. Pada praktikum DNS, perintah ini penting untuk mengetahui alamat IP host, gateway, DNS server, dan cache DNS.
 
 ---
 
-## 4.3.1 Menampilkan Informasi TCP/IP
+### 3.3.1 Menampilkan informasi TCP/IP
+
+Perintah:
 
 ```bash
 ipconfig /all
 ```
 
-![Hasil ipconfig all](assets/asset7.png)
+![Informasi ipconfig bagian 1](assets/asset4.png)
 
-### Analisis
+![Informasi ipconfig bagian 2](assets/asset5.png)
 
-Perintah ini menampilkan detail konfigurasi jaringan komputer secara lengkap. Pada praktikum DNS, informasi yang paling penting adalah alamat IPv4 dan DNS server yang digunakan.
+![Informasi ipconfig bagian 3](assets/asset6.png)
 
-DNS server tersebut nantinya akan dibandingkan dengan alamat tujuan paket DNS pada Wireshark.
+**Hasil dan analisis:**
+
+Dari hasil `ipconfig /all`, terlihat beberapa adapter jaringan pada komputer. Informasi yang paling penting untuk praktikum DNS adalah:
+
+```text
+IPv6 Address      : 2001:4489:50e:102::2
+Temporary IPv6    : 2001:4489:c0f0:6ed5:9b3:75f9:ae87:d7e9
+IPv4 Address      : 192.168.35.50
+Default Gateway   : 192.168.35.1
+DNS Servers       : 2001:4489:50e:102::2
+                    202.180.2.1
+```
+
+Informasi DNS server ini digunakan untuk dibandingkan dengan IP tujuan pada paket DNS di Wireshark.
 
 ---
 
-## 4.3.2 Menampilkan Cache DNS
+### 3.3.2 Menampilkan cache DNS
+
+Perintah:
 
 ```bash
 ipconfig /displaydns
 ```
 
-![Hasil displaydns](assets/asset8.png)
+![Hasil ipconfig displaydns](assets/asset7.png)
 
-### Analisis
+**Hasil dan analisis:**
 
-Perintah `displaydns` digunakan untuk melihat cache DNS yang tersimpan di komputer. Cache ini membantu mempercepat akses website karena host tidak perlu selalu mengirim query DNS baru.
+Perintah `ipconfig /displaydns` menampilkan cache DNS yang tersimpan pada host. Pada screenshot terlihat beberapa domain beserta record, TTL, section, dan alamat IP hasil resolusi.
 
-Pada output terlihat nama domain, TTL, dan alamat IP hasil resolusi.
+Cache DNS membantu mempercepat proses akses domain karena host tidak perlu selalu mengirim query DNS baru jika record masih valid.
 
 ---
 
-## 4.3.3 Menghapus Cache DNS
+### 3.3.3 Menghapus cache DNS
+
+Perintah:
 
 ```bash
 ipconfig /flushdns
 ```
 
-![Hasil flushdns](assets/asset9.png)
+![Hasil ipconfig flushdns](assets/asset8.png)
 
-### Analisis
+**Hasil dan analisis:**
 
-Perintah `flushdns` dipakai untuk menghapus seluruh cache DNS pada host. Setelah cache dibersihkan, komputer akan kembali mengirim query DNS baru ketika mengakses domain tertentu.
+Perintah `ipconfig /flushdns` berhasil menghapus DNS resolver cache. Setelah cache dikosongkan, komputer akan mengirim DNS query baru saat mengakses domain.
 
-Langkah ini penting dilakukan sebelum melakukan capture Wireshark.
-
----
-
-# 4.4 Tracing DNS Menggunakan Wireshark
-
-Pada bagian ini dilakukan analisis paket DNS menggunakan aplikasi Wireshark.
+Langkah ini penting sebelum melakukan capture Wireshark agar paket DNS yang muncul benar-benar berasal dari aktivitas pengujian.
 
 ---
 
-## 4.4.1 Capture DNS Saat Mengakses Website
+## 3.4 Tracing DNS Menggunakan Wireshark
 
-### Langkah Praktikum
-
-1. Menghapus cache DNS.
-2. Membuka Wireshark.
-3. Menentukan interface jaringan.
-4. Menggunakan filter:
-
-```text
-ip.addr == [alamat_IP]
-```
-
-5. Memulai capture.
-6. Mengakses website `http://www.ietf.org`.
-7. Menghentikan capture.
-8. Menggunakan filter `dns`.
-
-![Capture DNS IETF](assets/asset10.png)
+Bagian ini menganalisis paket DNS yang dihasilkan ketika mengakses website dan menjalankan perintah `nslookup`.
 
 ---
 
-## Analisis
+### 3.4.1 Capture DNS saat mengakses `http://www.ietf.org`
 
-### 1. DNS menggunakan UDP atau TCP?
+Langkah praktikum:
 
-Pada praktikum ini paket DNS dikirim menggunakan protokol UDP.
+1. Menghapus cache DNS dengan `ipconfig /flushdns`.
+2. Membuka browser dan membersihkan cache browser.
+3. Membuka Wireshark.
+4. Menggunakan filter berdasarkan alamat IP host.
+5. Mengakses `http://www.ietf.org`.
+6. Menghentikan capture.
+7. Menggunakan display filter `dns`.
 
-DNS umumnya memakai UDP karena ukuran paket relatif kecil dan prosesnya lebih cepat dibandingkan TCP.
+![Daftar paket DNS untuk akses IETF](assets/asset9.png)
+
+#### Pertanyaan 1: Apakah pesan DNS dikirim melalui UDP atau TCP?
+
+![Detail paket DNS UDP](assets/asset10.png)
+
+![Detail paket DNS UDP lanjutan](assets/asset10.1.png)
+
+**Jawaban:**
+
+Paket DNS dikirim menggunakan **UDP**. Pada detail paket Wireshark terlihat protokol **User Datagram Protocol** dengan port tujuan DNS.
 
 ---
 
-### 2. Port DNS
+#### Pertanyaan 2: Apa port tujuan request DNS dan port sumber response DNS?
 
-Port tujuan request DNS:
+**Jawaban:**
+
+Port tujuan pada DNS request adalah:
 
 ```text
 53
 ```
 
-Port sumber response DNS:
+Port sumber pada DNS response adalah:
 
 ```text
 53
 ```
 
-### Analisis
-
-DNS server menggunakan port 53 sebagai port standar layanan DNS.
+Port 53 adalah port standar untuk layanan DNS.
 
 ---
 
-### 3. Alamat IP Tujuan DNS
+#### Pertanyaan 3: Apa IP tujuan request DNS dan apakah sama dengan DNS lokal?
 
-IP tujuan request DNS:
+![Informasi DNS server lokal dari ipconfig](assets/asset11.2.png)
+
+![Informasi cache/browser pendukung](assets/asset11.1.png)
+
+![Daftar paket DNS response](assets/asset11.png)
+
+**Jawaban:**
+
+Berdasarkan hasil `ipconfig`, DNS server lokal yang digunakan adalah:
 
 ```text
-[Isi hasil Wireshark]
+2001:4489:50e:102::2
+202.180.2.1
 ```
 
-IP DNS lokal:
-
-```text
-[Isi hasil ipconfig]
-```
-
-### Analisis
-
-Jika kedua alamat IP sama, berarti komputer mengirim query ke DNS server default.
+Pada capture Wireshark, request DNS dikirim menuju DNS server tersebut. Jadi, alamat tujuan request DNS sesuai dengan DNS server lokal/default yang digunakan komputer.
 
 ---
 
-### 4. Type Request DNS
+#### Pertanyaan 4: Apa type DNS request dan apakah request memiliki answer?
 
-Type query:
+![Detail DNS query A untuk www.ietf.org](assets/asset12.png)
+
+**Jawaban:**
+
+Type request yang terlihat adalah:
 
 ```text
 A
 ```
 
-Apakah request memiliki answer?
-
-```text
-Tidak
-```
-
-### Analisis
-
-Paket request hanya membawa query dari client sehingga bagian answer masih kosong.
+Request DNS tidak memiliki answer karena paket request hanya berisi pertanyaan/query dari client ke DNS server.
 
 ---
 
-### 5. Isi DNS Response
+#### Pertanyaan 5: Berapa answer pada DNS response dan apa isinya?
 
-Jumlah answer:
+![Detail DNS response IETF](assets/asset13.png)
 
-```text
-[Isi jumlah answer]
-```
+**Jawaban:**
 
-Isi answer:
+DNS response untuk `www.ietf.org` memiliki **2 answer**, yaitu:
 
 ```text
-[Isi record DNS]
+www.ietf.org A 104.16.45.99
+www.ietf.org A 104.16.44.99
 ```
 
-### Analisis
-
-Response DNS dapat berisi beberapa record seperti A, AAAA, atau CNAME.
+Kedua alamat IP tersebut adalah hasil resolusi domain `www.ietf.org`.
 
 ---
 
-### 6. Paket TCP SYN
+#### Pertanyaan 6: Apakah IP pada TCP SYN sama dengan IP hasil DNS response?
 
-Apakah IP pada TCP SYN sama dengan hasil DNS response?
+![Detail alamat sumber dan tujuan paket](assets/asset14.png)
 
-```text
-[Sesuai / Tidak]
-```
+![Detail alamat sumber dan tujuan paket lanjutan](assets/asset14.1.png)
 
-### Analisis
+**Jawaban:**
 
-Setelah memperoleh alamat IP dari DNS, host akan menggunakan IP tersebut untuk membangun koneksi TCP.
+Paket setelah DNS menggunakan alamat IP tujuan yang sesuai dengan hasil DNS response. Artinya, setelah host memperoleh IP dari DNS, host menggunakan IP tersebut untuk membuat koneksi ke server tujuan.
 
 ---
 
-### 7. DNS Request untuk Gambar
+#### Pertanyaan 7: Apakah host mengirim DNS request baru untuk setiap gambar?
 
-Apakah host selalu mengirim request DNS baru?
+![Detail TCP segment setelah DNS](assets/asset9.1.png)
 
-```text
-Tidak selalu
-```
+**Jawaban:**
 
-### Analisis
-
-Jika domain gambar masih sama dan cache DNS masih aktif, host tidak perlu mengirim query DNS ulang.
+Tidak selalu. Jika gambar masih berasal dari domain yang sama dan record DNS masih ada di cache, host tidak perlu mengirim DNS request baru. DNS request baru hanya diperlukan jika browser mengakses domain lain atau record DNS belum ada di cache.
 
 ---
 
-# 4.4.2 Tracing DNS `nslookup www.mit.edu`
+### 3.4.2 Tracing DNS `nslookup www.mit.edu`
+
+Perintah:
 
 ```bash
 nslookup www.mit.edu
 ```
 
-![Capture nslookup MIT](assets/asset11.png)
+![Capture nslookup www.mit.edu](assets/asset1.png)
 
-## Analisis
+![Daftar paket nslookup www.mit.edu](assets/asset11.png)
 
-### 1. Port DNS
+#### Pertanyaan 1: Apa port tujuan request DNS dan port sumber response DNS?
 
-Request tujuan:
+**Jawaban:**
 
-```text
-53
-```
-
-Response sumber:
-
-```text
-53
-```
+Port tujuan request DNS adalah **53**, sedangkan port sumber response DNS juga **53**.
 
 ---
 
-### 2. Tujuan Request DNS
+#### Pertanyaan 2: Ke IP mana request DNS dikirim?
 
-```text
-[Isi IP DNS]
-```
+**Jawaban:**
 
-### Analisis
-
-Karena tidak menentukan DNS server tertentu, query dikirim ke DNS default.
+Request dikirim ke DNS server default/lokal yang digunakan host, yaitu DNS server yang muncul pada hasil `ipconfig /all`.
 
 ---
 
-### 3. Type Query
+#### Pertanyaan 3: Apa type query dan apakah request memiliki answer?
 
-```text
-A / AAAA
-```
+**Jawaban:**
 
-Apakah request memiliki answer?
-
-```text
-Tidak
-```
+Query untuk `www.mit.edu` menggunakan record **A** dan/atau **AAAA**. Paket request tidak memiliki answer karena hanya berisi query.
 
 ---
 
-### 4. Isi Response
+#### Pertanyaan 4: Berapa answer pada response dan apa isinya?
 
-Jumlah answer:
+**Jawaban:**
 
-```text
-[Isi jumlah answer]
-```
-
-Isi response:
-
-```text
-[Isi hasil response]
-```
-
-### Analisis
-
-Response dapat berisi alamat IP maupun CNAME dari domain tujuan.
+Response berisi alamat IP dari domain `www.mit.edu`. Pada output `nslookup`, domain tersebut mengembalikan beberapa alamat IPv4 dan IPv6.
 
 ---
 
-# 4.4.3 Tracing DNS `nslookup -type=NS mit.edu`
+#### Screenshot pendukung
+
+![Output nslookup www.mit.edu](assets/asset1.png)
+
+---
+
+### 3.4.3 Tracing DNS `nslookup -type=NS mit.edu`
+
+Perintah:
 
 ```bash
 nslookup -type=NS mit.edu
 ```
 
-![Capture NS MIT](assets/asset12.png)
+![Output nslookup type NS mit.edu](assets/asset15.png)
 
-## Analisis
+#### Pertanyaan 1: Ke IP mana request DNS dikirim?
 
-### 1. Tujuan Request DNS
+**Jawaban:**
 
-```text
-[Isi IP DNS]
-```
-
-### Analisis
-
-Request dikirim menuju DNS server default pada komputer.
+Request dikirim ke DNS server default/lokal. Karena perintah tidak menentukan DNS server tertentu, host menggunakan DNS server yang aktif pada konfigurasi jaringan.
 
 ---
 
-### 2. Type Query
+#### Pertanyaan 2: Apa type query dan apakah request memiliki answer?
+
+![DNS query NS mit.edu](assets/asset16.png)
+
+![DNS query NS mit.edu lanjutan](assets/asset17.png)
+
+**Jawaban:**
+
+Type query adalah:
 
 ```text
 NS
 ```
 
-Apakah request memiliki answer?
-
-```text
-Tidak
-```
+Request tidak memiliki answer karena request hanya meminta informasi name server untuk domain `mit.edu`.
 
 ---
 
-### 3. Hasil Name Server
+#### Pertanyaan 3: Apa nama server MIT yang diberikan dan apakah ada alamat IP?
+
+![DNS response NS mit.edu](assets/asset16.1.png)
+
+![DNS response NS mit.edu lanjutan](assets/asset17.1.png)
+
+**Jawaban:**
+
+Response memberikan beberapa name server untuk `mit.edu`, antara lain:
 
 ```text
-[Isi daftar NS]
+ns1-173.akam.net
+use5.akam.net
+usw2.akam.net
+asia2.akam.net
+ns1-37.akam.net
+use2.akam.net
+asia1.akam.net
 ```
 
-### Analisis
-
-Response menampilkan daftar authoritative name server milik domain `mit.edu`.
+Pada response Wireshark terlihat record NS. Alamat IP untuk server dapat muncul sebagai additional record jika DNS server menyertakannya.
 
 ---
 
-# 4.4.4 Tracing DNS `nslookup www.aiit.or.kr bitsy.mit.edu`
+#### Screenshot pendukung
+
+![Output command nslookup -type=NS mit.edu](assets/asset2.png)
+
+---
+
+### 3.4.4 Tracing DNS `nslookup www.aiit.or.kr bitsy.mit.edu`
+
+Perintah:
 
 ```bash
 nslookup www.aiit.or.kr bitsy.mit.edu
 ```
 
-![Capture custom DNS](assets/asset13.png)
+![Output command custom DNS](assets/asset18.png)
 
-## Analisis
+![Daftar paket custom DNS](assets/asset18.1.png)
 
-### 1. Tujuan Request DNS
+#### Pertanyaan 1: Ke IP mana request DNS dikirim dan apakah default DNS lokal?
 
-```text
-[Isi IP bitsy.mit.edu]
-```
+**Jawaban:**
 
-### Analisis
-
-Pada percobaan ini query tidak dikirim ke DNS lokal, melainkan langsung ke server yang ditentukan.
+Request diarahkan ke DNS server yang ditentukan pada perintah, yaitu `bitsy.mit.edu`. Karena DNS server ditentukan secara manual, request tidak dikirim ke DNS server lokal/default.
 
 ---
 
-### 2. Type Query
+#### Pertanyaan 2: Apa type query dan apakah request memiliki answer?
+
+![DNS query custom server](assets/asset19.png)
+
+**Jawaban:**
+
+Type query adalah:
 
 ```text
 A
 ```
 
-Apakah request memiliki answer?
-
-```text
-Tidak
-```
+Request tidak memiliki answer karena paket request hanya membawa pertanyaan DNS dari client.
 
 ---
 
-### 3. Isi Response
+#### Pertanyaan 3: Berapa answer pada response dan apa isinya?
 
-Jumlah answer:
+![DNS response custom server](assets/asset20.png)
+
+![DNS response custom server lanjutan](assets/asset20.1.png)
+
+**Jawaban:**
+
+Response berisi beberapa jawaban yang berkaitan dengan `www.aiit.or.kr`, termasuk record CNAME dan alamat IP akhir. Dari detail Wireshark terlihat chain CNAME menuju host CDN, kemudian menghasilkan alamat IP seperti:
 
 ```text
-[Isi jumlah answer]
+www.aiit.or.kr CNAME www-aiit-or-kr.cdn...edgekey.net
+... CNAME e3588.a...akamaiedge.net
+A 23.63.232.106
 ```
 
-Isi answer:
-
-```text
-[Isi record response]
-```
-
-### Analisis
-
-Response DNS berisi alamat IP hasil query terhadap domain `www.aiit.or.kr`.
+Artinya, domain `www.aiit.or.kr` diarahkan melalui layanan CDN sebelum menuju alamat IP akhir.
 
 ---
 
-# Kesimpulan
 
-Berdasarkan hasil praktikum yang telah dilakukan, dapat diketahui bahwa DNS memiliki fungsi utama untuk menerjemahkan nama domain menjadi alamat IP. Proses DNS dimulai ketika client mengirim request ke DNS server, kemudian server memberikan response berupa record DNS yang sesuai.
+## Kesimpulan
 
-Melalui perintah `nslookup`, pengguna dapat melakukan query DNS secara manual untuk mencari alamat IP, mail server, maupun authoritative name server. Sedangkan `ipconfig` digunakan untuk melihat konfigurasi jaringan serta mengelola cache DNS.
+Berdasarkan praktikum yang dilakukan, DNS berfungsi menerjemahkan nama domain menjadi alamat IP agar host dapat melakukan koneksi ke server tujuan. Perintah `nslookup` membantu melakukan query DNS secara manual, sedangkan `ipconfig` digunakan untuk melihat konfigurasi jaringan dan mengelola cache DNS.
 
-Dari hasil capture Wireshark terlihat bahwa DNS umumnya menggunakan protokol UDP dengan port 53. Paket request DNS hanya berisi query, sedangkan paket response membawa answer berupa record DNS seperti A, NS, MX, maupun CNAME.
+Dari hasil capture Wireshark, DNS pada praktikum ini menggunakan protokol UDP dengan port 53. Paket request DNS hanya berisi query dan belum memiliki answer, sedangkan paket response berisi jawaban berupa record seperti A, NS, CNAME, atau record lain sesuai jenis permintaan.
 
-Dengan adanya DNS, proses akses website menjadi lebih mudah karena pengguna tidak perlu menghafal alamat IP dari setiap server yang ingin diakses.
-
----
-
-# Daftar Screenshot
-
-| File        | Keterangan                                                     |
-| ----------- | -------------------------------------------------------------- |
-| asset1.png  | nslookup [www.mit.edu](http://www.mit.edu)                     |
-| asset2.png  | nslookup -type=NS mit.edu                                      |
-| asset3.png  | nslookup [www.aiit.or.kr](http://www.aiit.or.kr) bitsy.mit.edu |
-| asset4.png  | nslookup server Asia                                           |
-| asset5.png  | DNS otoritatif universitas Eropa                               |
-| asset6.png  | MX Yahoo Mail                                                  |
-| asset7.png  | ipconfig /all                                                  |
-| asset8.png  | ipconfig /displaydns                                           |
-| asset9.png  | ipconfig /flushdns                                             |
-| asset10.png | Capture DNS [www.ietf.org](http://www.ietf.org)                |
-| asset11.png | Capture nslookup [www.mit.edu](http://www.mit.edu)             |
-| asset12.png | Capture nslookup -type=NS mit.edu                              |
-| asset13.png | Capture nslookup custom DNS                                    |
+Pada akses `www.ietf.org`, response DNS menghasilkan alamat IP yang kemudian digunakan oleh host untuk koneksi berikutnya. Pada percobaan `nslookup -type=NS mit.edu`, response berisi daftar name server domain MIT. Pada percobaan custom DNS, request tidak memakai DNS lokal karena server DNS tujuan ditentukan secara manual.
