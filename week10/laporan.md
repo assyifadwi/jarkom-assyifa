@@ -1,240 +1,241 @@
-# Analisis Protokol IP Menggunakan Wireshark
+````md id="kzgr6v"
+# Laporan Praktikum Jaringan Komputer
+## Modul 10: Internet Protocol (IP)
 
-# Tujuan Praktikum
 
-Praktikum ini bertujuan untuk memahami cara kerja protokol IP menggunakan Wireshark, meliputi analisis IPv4, fragmentasi IP, serta pengenalan dasar IPv6.
+## 1. Tujuan Praktikum
+1. Memahami cara kerja protokol IP menggunakan Wireshark.  
+2. Mengamati paket IPv4 dan IPv6 pada jaringan komputer.  
+3. Menganalisis proses traceroute menggunakan ICMP dan IP.  
+4. Memahami mekanisme fragmentasi pada IPv4.  
+5. Mengamati penggunaan IPv6 pada jaringan komputer.  
 
----
 
-# 10.1 Pengantar
+## 2. Alat dan Bahan
+- Wireshark  
+- Command Prompt / Terminal  
+- Koneksi internet  
+- Sistem operasi Windows/Linux/MacOS  
 
-Internet Protocol (IP) merupakan protokol utama pada layer network yang bertugas mengirimkan paket data dari sumber menuju tujuan melalui jaringan.
 
-Pada praktikum ini dilakukan analisis paket IPv4 dan IPv6 menggunakan aplikasi Wireshark. Selain itu dilakukan pengamatan terhadap proses traceroute dan fragmentasi IP.
+## 3. Langkah Percobaan
 
-Traceroute bekerja dengan mengirim paket menggunakan nilai TTL berbeda-beda untuk mengetahui jalur router menuju tujuan.
-
----
-
-# 10.2 Capture Paket Traceroute
-
-Pada praktikum ini dilakukan capture paket menggunakan Wireshark bersamaan dengan menjalankan perintah traceroute menuju server:
-
-```bash
-traceroute gaia.cs.umass.edu 56
-````
-
-dan
-
-```bash
-traceroute gaia.cs.umass.edu 3000
-```
-
-Untuk Windows:
+### 3.1 Menjalankan Traceroute
+Pada sistem operasi Windows digunakan perintah:
 
 ```bash
 tracert gaia.cs.umass.edu
-```
+````
 
----
+Perintah tersebut digunakan untuk mengetahui jalur router yang dilewati paket menuju host tujuan.
 
-## Langkah Praktikum
+### 3.2 Menjalankan Wireshark
 
-1. Membuka Wireshark.
-2. Memulai capture paket.
-3. Menjalankan perintah traceroute ukuran 56 byte.
-4. Menjalankan traceroute ukuran 3000 byte.
-5. Menghentikan capture.
-6. Melakukan analisis paket IPv4, ICMP, dan IPv6.
+1. Membuka aplikasi Wireshark.
+2. Memilih interface jaringan yang aktif.
+3. Memulai proses capture paket.
+4. Menjalankan perintah traceroute.
+5. Menghentikan capture setelah proses selesai.
 
-![Capture Traceroute](assets/asset1.png)
-
----
-
-# 10.2.1 Bagian 1 - IPv4 Dasar
+### 3.3 Menggunakan Filter Wireshark
 
 Filter yang digunakan:
 
-```bash
-udp || icmp
+```text
+icmp && ip
 ```
 
-![Filter UDP dan ICMP](assets/asset2.png)
+Filter ini digunakan untuk menampilkan paket ICMP dan IP yang berkaitan dengan traceroute.
 
-### Analisis
+## 4. Hasil dan Pembahasan
 
-Filter tersebut digunakan untuk menampilkan paket UDP dan ICMP yang dihasilkan selama proses traceroute berlangsung.
+### 4.1 Hasil Traceroute
 
-Paket UDP dikirim oleh host menuju tujuan, sedangkan paket ICMP TTL Exceeded dikirim oleh router ketika nilai TTL mencapai nol.
+![Traceroute](assets/tracert.png)
 
----
+Pada gambar di atas terlihat hasil proses traceroute menuju `gaia.cs.umass.edu`.
 
-## Analisis Paket UDP
+Traceroute bekerja dengan mengirim paket menggunakan nilai TTL (Time To Live) yang berbeda-beda. Router yang menerima paket akan mengurangi nilai TTL sebesar 1.
 
-Filter:
+Jika nilai TTL menjadi 0, router akan mengirim pesan:
 
-```bash
-ip.src==[IP_CLIENT] && ip.dst==128.119.245.12 && udp && !icmp
+```text
+ICMP Time Exceeded
 ```
 
-![Paket UDP Traceroute](assets/asset3.png)
+kepada host pengirim.
 
-### Analisis
+Dengan mekanisme tersebut, traceroute dapat mengetahui router-router yang dilewati paket menuju tujuan.
 
-Paket UDP digunakan oleh traceroute untuk mengirim probe menuju server tujuan. Setiap paket dikirim dengan nilai TTL berbeda sehingga router yang dilewati dapat mengembalikan pesan ICMP.
+### 4.2 Filter ICMP dan IP
 
----
+![Filter ICMP IP](assets/FilterIcmpIp.png)
 
-## Analisis Paket ICMP
+Pada Wireshark digunakan filter:
 
-Filter:
-
-```bash
-ip.dst==[IP_CLIENT] && icmp
+```text
+icmp && ip
 ```
 
-![Paket ICMP TTL Exceeded](assets/asset4.png)
+Filter ini digunakan agar hanya paket ICMP dan IP yang ditampilkan.
 
-### Analisis
+Paket IP digunakan oleh traceroute untuk mengirim probe packet, sedangkan paket ICMP digunakan oleh router untuk mengirim balasan ketika TTL habis.
 
-Router yang menerima paket dengan TTL bernilai nol akan mengirim pesan ICMP TTL Exceeded kembali ke host pengirim.
+### 4.3 Analisis Header IPv4
 
-Dari pesan ICMP tersebut dapat diketahui alamat router yang dilewati selama proses traceroute.
+![Header IPv4](assets/HeaderIPv4.png)
 
----
+Pada paket IPv4 terdapat beberapa field penting:
 
-## Analisis TTL
+| Field               | Fungsi                               |
+| ------------------- | ------------------------------------ |
+| Version             | Menunjukkan versi IP yang digunakan  |
+| Header Length       | Panjang header IP                    |
+| Total Length        | Panjang keseluruhan datagram         |
+| Identification      | Identitas datagram untuk fragmentasi |
+| Flags               | Menunjukkan fragmentasi              |
+| Fragment Offset     | Posisi fragment dalam datagram       |
+| TTL                 | Batas hop paket                      |
+| Protocol            | Jenis protokol layer atas            |
+| Source Address      | Alamat IP pengirim                   |
+| Destination Address | Alamat IP tujuan                     |
 
-### Analisis
+Field TTL sangat penting pada traceroute karena digunakan untuk menentukan jumlah hop yang dilewati paket.
 
-Nilai TTL pada setiap paket traceroute meningkat secara bertahap:
+### 4.4 Analisis TTL dan ICMP Time Exceeded
 
-* TTL 1
-* TTL 2
-* TTL 3
-* dan seterusnya
+![TTL Packet](assets/TTL.png)
 
-Setiap router akan mengurangi TTL sebesar 1 sebelum meneruskan paket ke router berikutnya.
+Pada gambar di atas terlihat paket ICMP yang dikirim oleh router ketika nilai TTL mencapai nol.
 
-Jika TTL mencapai nol, router akan membuang paket dan mengirim ICMP TTL Exceeded.
+Setiap router akan mengurangi nilai TTL sebesar 1. Ketika TTL habis, router akan membuang paket dan mengirim pesan:
 
----
+```text
+ICMP Time Exceeded
+```
 
-# 10.2.2 Bagian 2 - Fragmentasi IP
+kepada host pengirim.
 
-Pada bagian ini dilakukan analisis terhadap paket traceroute berukuran besar yaitu 3000 byte.
+Mekanisme inilah yang digunakan traceroute untuk mengetahui jalur router menuju tujuan.
 
-![Fragmentasi IP](assets/asset5.png)
+### 4.5 Fragmentasi IPv4
 
-### Analisis
+![Filter Fragmentasi](assets/FilterFragmentasi.png)
 
-Karena ukuran paket lebih besar dari MTU jaringan, datagram IP akan dipecah menjadi beberapa fragmen.
+![Paket Fragmentasi](assets/PaketFragmentasi.png)
 
-Setiap fragmen memiliki:
+Pada praktikum ini digunakan datagram dengan ukuran besar, yaitu sekitar:
 
-* Identification yang sama
-* Fragment Offset berbeda
-* Flag fragment tertentu
+```text
+3000 byte
+```
 
-Tujuan fragmentasi adalah agar paket dapat melewati jaringan dengan batas ukuran frame tertentu.
+Ukuran tersebut lebih besar daripada MTU (Maximum Transmission Unit) jaringan Ethernet yang umumnya sekitar:
 
----
+```text
+1500 byte
+```
 
-## Identification Field
+Karena ukuran datagram melebihi MTU, maka datagram IPv4 harus dipecah menjadi beberapa bagian yang lebih kecil. Proses ini disebut **fragmentasi IP**.
 
-### Analisis
+Pada modul dijelaskan bahwa pengguna Windows tidak dapat menghasilkan fragmentasi menggunakan perintah `tracert`, karena Windows tidak menyediakan pengaturan ukuran paket ICMP secara bebas. Oleh karena itu, analisis fragmentasi dilakukan menggunakan file trace dari modul praktikum.
 
-Field Identification digunakan untuk menandai bahwa beberapa fragmen berasal dari datagram IP yang sama.
+Fragmentasi dapat diamati pada Wireshark melalui beberapa field penting berikut:
 
-Ketika seluruh fragmen diterima, host tujuan akan melakukan proses reassembly berdasarkan nilai Identification tersebut.
+| Field               | Fungsi                                                 |
+| ------------------- | ------------------------------------------------------ |
+| Identification      | Menandai fragment yang berasal dari datagram yang sama |
+| More Fragments (MF) | Menunjukkan masih ada fragment berikutnya              |
+| Fragment Offset     | Menentukan posisi fragment dalam datagram asli         |
+| Total Length        | Panjang masing-masing fragment                         |
 
----
+Semua fragment memiliki nilai **Identification** yang sama karena berasal dari datagram yang sama.
 
-## Fragment Offset
+Field **More Fragments (MF)** bernilai aktif pada fragment awal dan bernilai 0 pada fragment terakhir. Hal ini digunakan untuk memberi tahu host tujuan apakah masih ada fragment lain yang akan diterima.
 
-### Analisis
+Field **Fragment Offset** digunakan untuk menentukan posisi fragment ketika proses penyusunan ulang (reassembly) dilakukan di host tujuan.
 
-Fragment Offset digunakan untuk menunjukkan posisi fragmen pada datagram asli.
+Pada proses fragmentasi:
 
-Dengan informasi offset, host tujuan dapat menyusun ulang seluruh fragmen sesuai urutannya.
+1. Datagram besar dipecah menjadi beberapa fragment kecil.
+2. Setiap fragment dikirim sebagai paket IP terpisah.
+3. Host tujuan akan melakukan reassembly berdasarkan nilai Identification dan Fragment Offset.
 
----
+Fragmentasi diperlukan agar paket dapat melewati jaringan yang memiliki batas ukuran frame tertentu. Namun, fragmentasi dapat menambah overhead dan memperlambat proses pengiriman data karena host tujuan harus menyusun kembali fragment-fragment tersebut.
 
-## More Fragment Flag
+### 4.6 Analisis IPv6
 
-### Analisis
+![Filter IPv6](assets/FilterIPv6.png)
 
-Flag MF (More Fragment) digunakan untuk menunjukkan apakah masih terdapat fragmen lain setelah fragmen tersebut.
+![Header IPv6](assets/headerIPv6.png)
 
-* MF = 1 → masih ada fragmen berikutnya
-* MF = 0 → fragmen terakhir
+Pada hasil capture ditemukan paket IPv6 dengan alamat bertipe **link-local IPv6**.
 
----
+Alamat IPv6 link-local biasanya memiliki prefix:
 
-# 10.2.3 Bagian 3 - IPv6
+```text
+fe80::
+```
 
-Pada bagian ini dilakukan analisis paket IPv6 menggunakan file capture yang telah disediakan.
+Alamat ini digunakan untuk komunikasi lokal dalam satu jaringan (local network segment) dan dibuat secara otomatis oleh perangkat tanpa memerlukan DHCP server ataupun konfigurasi manual.
 
-![Paket IPv6](assets/asset6.png)
+Berbeda dengan IPv4 yang menggunakan alamat 32-bit, IPv6 menggunakan alamat 128-bit sehingga menyediakan jumlah alamat yang jauh lebih besar.
 
-### Analisis
+Beberapa karakteristik IPv6:
 
-IPv6 merupakan pengembangan dari IPv4 dengan ukuran alamat 128 bit sehingga menyediakan jumlah alamat jauh lebih besar.
+| IPv4                  | IPv6                   |
+| --------------------- | ---------------------- |
+| 32-bit address        | 128-bit address        |
+| Menggunakan NAT       | Tidak memerlukan NAT   |
+| Header lebih kompleks | Header lebih sederhana |
+| Broadcast             | Menggunakan multicast  |
 
-Selain itu, IPv6 memiliki struktur header yang lebih sederhana dibandingkan IPv4.
+Pada packet detail Wireshark terlihat field IPv6 seperti:
 
----
+* Source Address
+* Destination Address
+* Next Header
+* Hop Limit
 
-## Analisis DNS IPv6
+Field **Hop Limit** pada IPv6 memiliki fungsi yang sama dengan field TTL pada IPv4, yaitu membatasi jumlah hop paket pada jaringan.
 
-Paket yang diamati merupakan DNS request tipe AAAA.
+Meskipun pada capture tidak ditemukan DNS AAAA request, keberadaan alamat IPv6 link-local menunjukkan bahwa perangkat dan jaringan yang digunakan sudah mendukung protokol IPv6.
 
-![DNS IPv6](assets/asset7.png)
+### 4.7 Analisis Cara Kerja Traceroute
 
-### Analisis
+Traceroute bekerja dengan mengirim paket menggunakan nilai TTL yang meningkat secara bertahap.
 
-Request DNS tipe AAAA digunakan untuk mencari alamat IPv6 dari suatu domain.
+Contoh:
 
-Pada praktikum ini dilakukan request terhadap domain youtube.com untuk memperoleh alamat IPv6 miliknya.
+| Paket         | TTL |
+| ------------- | --- |
+| Paket pertama | 1   |
+| Paket kedua   | 2   |
+| Paket ketiga  | 3   |
 
----
+Ketika paket pertama dikirim dengan TTL=1, router pertama akan mengurangi TTL menjadi 0 dan mengirim ICMP Time Exceeded.
 
-## Perbedaan IPv4 dan IPv6
+Ketika paket kedua dikirim dengan TTL=2, router kedua akan mengirim ICMP Time Exceeded.
 
-| IPv4                   | IPv6                       |
-| ---------------------- | -------------------------- |
-| 32 bit                 | 128 bit                    |
-| Menggunakan NAT        | Tidak membutuhkan NAT      |
-| Header lebih kompleks  | Header lebih sederhana     |
-| Jumlah alamat terbatas | Jumlah alamat sangat besar |
+Proses ini berlangsung terus hingga paket mencapai host tujuan.
 
-![Perbandingan IPv4 dan IPv6](assets/asset8.png)
+Dengan cara tersebut, traceroute dapat mengetahui jalur router yang dilewati paket.
 
----
+### 4.8 Pembahasan Hasil Praktikum
 
-# Kesimpulan
+Berdasarkan hasil praktikum, Wireshark berhasil menangkap paket IPv4, ICMP, UDP, dan IPv6.
 
-Berdasarkan hasil praktikum, dapat diketahui bahwa protokol IP berfungsi untuk mengirimkan paket data antar jaringan menggunakan alamat IP sebagai identitas host.
+Traceroute memanfaatkan field TTL pada IPv4 untuk mengetahui jalur router menuju tujuan. Ketika TTL habis, router mengirim pesan ICMP Time Exceeded.
 
-Pada analisis traceroute terlihat bahwa nilai TTL digunakan untuk menentukan jalur router yang dilewati paket menuju tujuan. Ketika TTL habis, router akan mengirim pesan ICMP TTL Exceeded.
+Pada praktikum juga terlihat proses fragmentasi IPv4 ketika ukuran datagram terlalu besar. Datagram dipecah menjadi beberapa fragment agar dapat dikirim melalui jaringan.
 
-Selain itu, paket IP berukuran besar dapat mengalami fragmentasi apabila ukuran paket melebihi MTU jaringan. Proses fragmentasi menggunakan field Identification, Fragment Offset, dan More Fragment.
+Selain itu diamati paket IPv6 link-local yang menunjukkan dukungan IPv6 pada jaringan yang digunakan.
 
-Pada bagian IPv6 terlihat bahwa IPv6 memiliki jumlah alamat jauh lebih besar dibandingkan IPv4 serta struktur header yang lebih sederhana.
+Praktikum ini membantu memahami cara kerja dasar Internet Protocol pada jaringan komputer.
 
-Dengan demikian, praktikum ini membantu memahami proses kerja protokol IP baik pada IPv4 maupun IPv6.
+## 5. Kesimpulan
 
----
+Berdasarkan hasil praktikum, protokol IP berfungsi untuk pengalamatan dan pengiriman paket pada jaringan komputer. Traceroute memanfaatkan field TTL dan pesan ICMP untuk mengetahui jalur router menuju tujuan. Pada IPv4 juga terdapat mekanisme fragmentasi ketika ukuran datagram melebihi MTU jaringan. Selain IPv4, praktikum juga menunjukkan penggunaan IPv6 link-local pada jaringan modern.
 
-# Daftar Screenshot
-
-| File       | Keterangan                 |
-| ---------- | -------------------------- |
-| asset1.png | Capture traceroute         |
-| asset2.png | Filter UDP dan ICMP        |
-| asset3.png | Paket UDP traceroute       |
-| asset4.png | Paket ICMP TTL Exceeded    |
-| asset5.png | Fragmentasi IP             |
-| asset6.png | Paket IPv6                 |
-| asset7.png | DNS request AAAA           |
-| asset8.png | Perbandingan IPv4 dan IPv6 |
+```
+```
