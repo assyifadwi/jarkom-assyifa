@@ -1,359 +1,401 @@
-# Analisis Protokol TCP Menggunakan Wireshark
+# Laporan Praktikum Jaringan Komputer
 
-# Tujuan Praktikum
+## Modul 6: Analisis Protokol TCP
 
-Praktikum ini bertujuan untuk memahami cara kerja protokol TCP menggunakan Wireshark. Selain itu, praktikum dilakukan untuk menganalisis proses komunikasi TCP seperti three-way handshake, sequence number, acknowledgement, retransmission, flow control, congestion control, throughput, dan round trip time.
+## 1. Tujuan Praktikum
 
----
+1. Memahami mekanisme kerja protokol TCP menggunakan Wireshark.
+2. Menganalisis proses pengiriman data menggunakan TCP.
+3. Mengidentifikasi sequence number, acknowledgement, RTT, throughput, dan congestion control pada TCP.
 
-# 6.1 Pengantar
+## 2. Alat dan Bahan
 
-TCP atau Transmission Control Protocol merupakan protokol layer transport yang bersifat connection-oriented dan reliable. TCP digunakan untuk memastikan data dapat dikirim dengan urut, lengkap, dan tanpa error.
+* Wireshark
+* Web browser
+* Koneksi internet
+* File `alice.txt`
 
-Berbeda dengan UDP, TCP memiliki mekanisme seperti:
+## 3. Langkah Percobaan
 
-- Three-way handshake
-- Acknowledgement
-- Retransmission
-- Flow control
-- Congestion control
+### 3.1 Mengambil File Alice.txt
 
-Pada praktikum ini dilakukan analisis transfer file menggunakan metode HTTP POST untuk melihat bagaimana TCP bekerja dalam proses pengiriman data berukuran besar.
+1. Membuka browser.
+2. Mengakses:
+   [http://gaia.cs.umass.edu/wireshark-labs/alice.txt](http://gaia.cs.umass.edu/wireshark-labs/alice.txt)
+3. Mengunduh file `alice.txt`.
 
----
+![Alice File](assets/aliceFIle.png)
 
-# 6.2 Capture Transfer TCP
+### 3.2 Upload File Menggunakan HTTP POST
 
-Pada praktikum ini dilakukan upload file `alice.txt` ke server:
+1. Membuka halaman:
+   [http://gaia.cs.umass.edu/wireshark-labs/TCP-wireshark-file1.html](http://gaia.cs.umass.edu/wireshark-labs/TCP-wireshark-file1.html)
+2. Menjalankan Wireshark dan memulai capture.
+3. Mengupload file `alice.txt`.
+4. Menghentikan capture setelah upload selesai.
+
+![Upload Alice](assets/uploadAlice.png)
+
+![Submit Alice](assets/SubmitAlice.png)
+
+![Capture Setelah Submit](assets/CaptureSetelahSubAlice.png)
+
+### 3.3 Filter Paket TCP
+
+1. Menggunakan filter:
 
 ```text
-http://gaia.cs.umass.edu
-````
-
-Capture dilakukan menggunakan Wireshark selama proses upload berlangsung.
-
-Langkah praktikum:
-
-1. Mengunduh file `alice.txt`.
-2. Membuka halaman upload file.
-3. Menjalankan Wireshark.
-4. Memulai capture paket.
-5. Mengunggah file menggunakan HTTP POST.
-6. Menghentikan capture.
-
-![Capture TCP](assets/asset1.png)
-
----
-
-# 6.3 Analisis Awal Trace TCP
-
-Filter yang digunakan pada Wireshark:
-
-```bash
 tcp
 ```
+![Capture Setelah Submit](assets/CaptureSetelahSubAlice.png)
 
-Setelah filter diterapkan, terlihat komunikasi TCP antara client dan server gaia.cs.umass.edu.
+2. Mengamati paket TCP hasil upload file.
 
-![Filter TCP](assets/asset2.png)
+### 3.4 Menonaktifkan HTTP Protocol
 
----
-
-## Pertanyaan 6.3
-
-### 1. IP Address dan Port TCP Client
-
-IP Address client:
+1. Membuka menu:
 
 ```text
-[Isi IP client]
+Analyze → Enabled Protocols
 ```
 
-Port TCP client:
+2. Menghapus centang pada HTTP.
+3. Mengamati segmen TCP secara langsung.
+
+### 3.5 Analisis Congestion Control
+
+1. Memilih salah satu paket TCP client → server.
+2. Membuka:
 
 ```text
-[Isi port TCP client]
+Statistics → TCP Stream Graph → Time-Sequence Graph (Stevens)
 ```
+![Capture Setelah Submit](assets/grafikTimeSequence.png)
+3. Mengamati grafik sequence number terhadap waktu.
 
-### Analisis
+## 4. Hasil dan Pembahasan
 
-Port yang digunakan client biasanya berupa ephemeral port atau port acak yang dipilih sistem operasi untuk komunikasi sementara.
+### 4.1 Soal 1: Analisis IP dan Port TCP
 
----
+**Soal:**
+Berapa alamat IP dan nomor port TCP yang digunakan oleh komputer klien (sumber) untuk mentransfer file ke `gaia.cs.umass.edu`? Cara paling mudah menjawab pertanyaan ini adalah dengan memilih sebuah pesan HTTP dan meneliti detail paket TCP yang digunakan untuk membawa pesan HTTP tersebut.
 
-### 2. IP Address dan Port Server
+**Jawaban:**
 
-IP Address server gaia.cs.umass.edu:
+Berdasarkan hasil capture, alamat IP client adalah:
 
 ```text
-[Isi IP server]
+192.168.1.102
 ```
+![Source Address](assets/SourceAddress-etheral.png)
 
-Port TCP server:
+dengan source port:
+
+```text
+1161
+```
+![IP Client](assets/SourcePort-etheral.png)
+
+### 4.2 Soal 2: IP dan Port Server
+
+**Soal:**
+Apa alamat IP dari `gaia.cs.umass.edu`? Pada nomor port berapa ia mengirim dan menerima segmen TCP untuk koneksi ini?
+
+**Jawaban:**
+
+Sedangkan server `gaia.cs.umass.edu` memiliki alamat IP:
+
+```text
+128.119.245.12
+```
+![Destination Address](assets/DesstinationAddress.png)
+
+dengan destination port:
 
 ```text
 80
 ```
+![Destination Port](assets/DestionPort.png)
 
-### Analisis
+### 4.3 Soal 3: IP dan Port Client dari Capture Sendiri
 
-Server menggunakan port 80 karena proses upload dilakukan menggunakan protokol HTTP.
+**Soal:**
+Berapa alamat IP dan nomor port TCP yang digunakan oleh komputer klien Anda (sumber) untuk mentransfer file ke `gaia.cs.umass.edu`?
 
----
-
-### 3. IP dan Port TCP Client Sendiri
-
-IP client:
-
-```text
-[Isi IP client]
-```
-
-Port TCP:
+**Jawaban:**
+Berdasarkan hasil capture sendiri, alamat IP client adalah:
 
 ```text
-[Isi port TCP]
+172.20.10.2
 ```
+![IP Client](assets/IPClient.png)
 
----
-
-# 6.4 Dasar TCP
-
-## 1. Sequence Number Segmen SYN
-
-Sequence Number SYN:
+dengan source port:
 
 ```text
-[Isi sequence number]
+57972
 ```
+![Source Port](assets/PortTCPClient.png)
 
-Segmen dapat dikenali sebagai SYN karena memiliki flag:
+### 4.4 Soal 4: Segmen TCP SYN
+
+**Soal:**
+Berapa nomor urut segmen TCP SYN yang digunakan untuk memulai sambungan TCP antara komputer klien dan `gaia.cs.umass.edu`? Apa yang dimiliki segmen tersebut sehingga teridentifikasi sebagai segmen SYN?
+
+**Jawaban:**
+![TCP SYN](assets/TCPSYN.png)
+
+Segmen SYN memiliki nomor urut:
 
 ```text
-SYN = 1
+Flags: 0x002 (SYN)
+Sequence Number = 0
 ```
 
-![Segmen SYN](assets/asset3.png)
+### 4.5 Soal 5: Segmen TCP SYNACK
 
-### Analisis
+**Soal:**
+Berapa nomor urut segmen SYNACK yang dikirim oleh `gaia.cs.umass.edu` ke komputer klien sebagai balasan dari SYN? Berapa nilai field acknowledgement pada segmen SYNACK? Bagaimana server menentukan nilai tersebut? Apa yang dimiliki segmen sehingga teridentifikasi sebagai segmen SYNACK?
 
-Segmen SYN digunakan untuk memulai koneksi TCP antara client dan server dalam proses three-way handshake.
+**Jawaban:**
+![TCP SYNACK](assets/TCPSYNACK.png)
 
----
-
-## 2. Sequence Number Segmen SYNACK
-
-Sequence Number SYNACK:
+Sedangkan segmen SYNACK memiliki:
 
 ```text
-[Isi sequence number]
+Flags: 0x012 (SYN, ACK)
+Acknowledgement Number = 1
 ```
 
-Acknowledgement Number:
+Nilai acknowledgement diperoleh dari:
 
 ```text
-[Isi acknowledgement]
+ACK = Sequence Number SYN + 1
 ```
 
-Flag yang aktif:
+### 4.6 Soal 6: Segmen HTTP POST
+
+**Soal:**
+Berapa nomor urut segmen TCP yang berisi perintah HTTP POST?
+
+**Jawaban:**
+![HTTP POST](assets/tcpHttpPost.png)
+
+Segmen TCP yang membawa HTTP POST memiliki:
 
 ```text
-SYN = 1
-ACK = 1
+Sequence Number = 1
 ```
 
-![Segmen SYNACK](assets/asset4.png)
+Paket tersebut merupakan awal pengiriman data file dari client menuju server.
 
-### Analisis
+### 4.7 Soal 7: RTT dan EstimatedRTT
 
-Server menentukan acknowledgement number dengan menambahkan 1 pada sequence number milik client sebelumnya.
+**Soal:**
+Anggap segmen TCP yang berisi HTTP POST sebagai segmen pertama dalam koneksi TCP. Berapa nomor urut enam segmen pertama TCP? Kapan ACK diterima? Berapa nilai RTT dan EstimatedRTT?
 
----
+**Jawaban:**
 
-## 3. Sequence Number HTTP POST
+![RTT dan Sequence Number](assets/No4.png)
 
-Sequence Number segmen HTTP POST:
+Enam segmen pertama TCP memiliki RTT sebagai berikut:
 
-```text
-[Isi sequence number]
-```
-
-![HTTP POST](assets/asset5.png)
-
-### Analisis
-
-Segmen ini membawa data HTTP POST yang digunakan untuk mengunggah file ke server.
-
----
-
-## 4. Sequence Number dan RTT
-
-| Segmen | Sequence Number | Waktu Kirim | Waktu ACK | RTT   |
-| ------ | --------------- | ----------- | --------- | ----- |
-| 1      | [Isi]           | [Isi]       | [Isi]     | [Isi] |
-| 2      | [Isi]           | [Isi]       | [Isi]     | [Isi] |
-| 3      | [Isi]           | [Isi]       | [Isi]     | [Isi] |
-| 4      | [Isi]           | [Isi]       | [Isi]     | [Isi] |
-| 5      | [Isi]           | [Isi]       | [Isi]     | [Isi] |
-| 6      | [Isi]           | [Isi]       | [Isi]     | [Isi] |
-
-![RTT TCP](assets/asset6.png)
-
-### Analisis
-
-RTT atau Round Trip Time menunjukkan waktu yang dibutuhkan paket untuk dikirim hingga acknowledgement diterima kembali.
-
-Nilai RTT dipengaruhi oleh delay jaringan, jarak server, dan kondisi lalu lintas jaringan.
-
----
-
-## 5. Panjang Enam Segmen TCP Pertama
-
-| Segmen | Panjang |
+| Segmen | RTT     |
 | ------ | ------- |
-| 1      | [Isi]   |
-| 2      | [Isi]   |
-| 3      | [Isi]   |
-| 4      | [Isi]   |
-| 5      | [Isi]   |
-| 6      | [Isi]   |
+| 1      | 0.027 s |
+| 2      | 0.035 s |
+| 3      | 0.070 s |
+| 4      | 0.114 s |
+| 5      | 0.139 s |
+| 6      | 0.189 s |
 
-### Analisis
+EstimatedRTT dihitung menggunakan rumus:
 
-Ukuran segmen TCP dapat berbeda tergantung jumlah data yang dibawa pada payload.
+[
+EstimatedRTT = (1-\alpha) \times EstimatedRTT + \alpha \times SampleRTT
+]
 
----
-
-## 6. Buffer Penerima TCP
-
-Ukuran minimum buffer penerima:
+dengan:
 
 ```text
-[Isi ukuran buffer]
+α = 0.125
 ```
 
-### Analisis
+### 4.8 Soal 8: Panjang Segmen TCP
 
-Buffer digunakan untuk menyimpan data sementara sebelum diproses oleh receiver. Jika buffer penuh, receiver dapat memperlambat pengiriman data menggunakan flow control.
+**Soal:**
+Berapa panjang setiap enam segmen TCP pertama?
 
----
+**Jawaban:**
 
-## 7. Retransmission TCP
 
-Apakah terdapat retransmission?
+![Segmen 1](assets/No5.png)
+
+![Segmen 2](assets/No5.1.png)
+
+![Segmen 3](assets/No5.2.png)
+
+![Segmen 4](assets/No5.3.png)
+
+![Segmen 5](assets/No5.4.png)
+
+![Segmen 6](assets/No5.5.png)
+
+Panjang enam segmen TCP pertama adalah:
+
+| Segmen | Panjang   |
+| ------ | --------- |
+| 1      | 565 byte  |
+| 2      | 1460 byte |
+| 3      | 1460 byte |
+| 4      | 1460 byte |
+| 5      | 1460 byte |
+| 6      | 1460 byte |
+
+### 4.9 Soal 9: Flow Control TCP
+
+**Soal:**
+Berapa jumlah minimum ruang buffer tersedia yang disarankan kepada penerima dan diterima untuk seluruh trace? Apakah kurangnya ruang buffer penerima pernah menghambat pengiriman?
+
+**Jawaban:**
+
+![Window Size](assets/No6.png)
+
+Nilai minimum receive window yang ditemukan adalah sekitar:
 
 ```text
-[Ya / Tidak]
+8760 byte
 ```
 
-### Analisis
+Tidak ditemukan hambatan pengiriman akibat kekurangan buffer penerima.
 
-Retransmission dapat dikenali melalui:
+### 4.10 Soal 10: Retransmission TCP
 
-* Sequence number yang sama
-* Label retransmission pada Wireshark
-* ACK yang terlambat atau duplicate ACK
+**Soal:**
+Apakah ada segmen yang ditransmisikan ulang dalam file trace? Apa yang diperiksa di dalam file trace untuk menjawab pertanyaan tersebut?
 
-![Retransmission](assets/asset7.png)
+**Jawaban:**
 
----
+![Retransmission](assets/Retransmission.png)
 
-## 8. ACK pada TCP
-
-Jumlah data yang di-ACK:
+Filter berikut digunakan:
 
 ```text
-[Isi jumlah byte]
+tcp.analysis.retransmission
 ```
 
-### Analisis
+Tidak ditemukan retransmission pada trace sehingga pengiriman data berjalan normal.
 
-Receiver biasanya melakukan cumulative ACK terhadap beberapa segmen sekaligus untuk meningkatkan efisiensi komunikasi.
+### 4.11 Soal 11: ACK pada TCP
 
----
+**Soal:**
+Berapa banyak data yang biasanya diakui oleh penerima dalam ACK? Dapatkah diidentifikasi kasus ketika penerima melakukan ACK untuk setiap segmen yang diterima?
 
-## 9. Throughput TCP
+**Jawaban:**
 
-Throughput:
+![ACK Packet](assets/No8.png)
+
+Receiver biasanya mengirim acknowledgement untuk dua segmen sekaligus. Namun pada beberapa kondisi ditemukan ACK untuk setiap segmen yang diterima.
+
+### 4.12 Soal 12: Throughput TCP
+
+**Soal:**
+Berapa throughput untuk sambungan TCP? Jelaskan bagaimana cara menghitungnya.
+
+**Jawaban:**
+
+![Throughput Awal](assets/No9Awal.png)
+
+![Throughput Akhir](assets/No9Akhir.png)
+
+Perhitungan throughput dilakukan menggunakan:
+
+[
+Throughput = \frac{Total\ Data}{Total\ Waktu}
+]
+
+Data yang dikirim sekitar:
 
 ```text
-[Isi hasil throughput]
+150 KB
 ```
 
-### Cara Perhitungan
+Waktu transfer:
 
 ```text
-Throughput = Total Data / Total Waktu Transfer
+5.651141 - 0.026477 = 5.624664 detik
 ```
 
-### Analisis
-
-Semakin besar throughput, semakin cepat proses transfer data berlangsung.
-
----
-
-# 6.5 Congestion Control TCP
-
-Pada bagian ini digunakan fitur:
+Maka throughput TCP diperoleh sebesar:
 
 ```text
-Statistics -> TCP Stream Graph -> Time-Sequence-Graph (Stevens)
+≈ 26.7 KB/s
 ```
 
-![Time Sequence Graph](assets/asset8.png)
+### 4.10 Congestion Control TCP
 
----
+Pada bagian congestion control, analisis dilakukan menggunakan grafik **Time-Sequence Graph (Stevens)**. Grafik ini menunjukkan hubungan antara waktu pengiriman paket dengan sequence number TCP.
 
-## 1. Analisis Slow Start dan Congestion Avoidance
+#### 4.10.1 Contoh Awal Grafik Time-Sequence
 
-### Slow Start
+![Contoh Grafik Time Sequence](assets/grafikTimeSequence.png)
 
-Fase slow start terlihat ketika jumlah data yang dikirim meningkat secara cepat pada awal koneksi.
+Grafik di atas merupakan contoh tampilan **Time-Sequence Graph (Stevens)**. Pada grafik ini, sumbu horizontal menunjukkan waktu, sedangkan sumbu vertikal menunjukkan sequence number. Semakin naik grafik, semakin banyak data yang dikirim oleh client ke server.
 
-### Congestion Avoidance
+#### 4.10.2 Soal 1: Statistik dari Trace Ethernet/Modul
 
-Setelah mencapai batas tertentu, pertumbuhan pengiriman data menjadi lebih stabil dan linear.
+**Soal:**
+Gunakan alat plotting **Time-Sequence-Graph (Stevens)** untuk melihat grafik nomor urut berbanding waktu dari segmen yang dikirim oleh klien ke server `gaia.cs.umass.edu`. Dapatkah Anda mengidentifikasi di mana fase **slow start** TCP dimulai dan berakhir, dan pada bagian mana algoritma **congestion avoidance** mengambil alih? Berikan komentar tentang bagaimana data yang diukur berbeda dari perilaku ideal TCP yang telah dipelajari.
 
-### Analisis
+![Grafik Time Sequence Trace Modul](assets/grafikNo1.png)
 
-Mekanisme congestion control digunakan TCP untuk menghindari kemacetan jaringan dengan mengatur jumlah data yang dikirim.
+**Jawaban:**
+Berdasarkan grafik dari trace `tcp-ethereal-trace-1`, fase **slow start** terjadi pada bagian awal grafik. Pada fase ini, sequence number meningkat dengan cepat karena congestion window bertambah secara eksponensial.
 
----
+Fase slow start terlihat sekitar:
 
-## 2. Analisis Berdasarkan Trace Sendiri
+```text
+0 – 0.5 detik
+```
 
-Berdasarkan hasil trace yang diperoleh, fase slow start dan congestion avoidance dapat diamati dari perubahan pola grafik sequence number terhadap waktu.
+Setelah itu, grafik mulai menunjukkan kenaikan yang lebih stabil dan cenderung linear. Bagian tersebut menunjukkan bahwa TCP mulai masuk ke fase **congestion avoidance**.
 
-![Grafik TCP](assets/asset9.png)
+Fase congestion avoidance terjadi sekitar:
 
-### Analisis
+```text
+setelah 0.5 detik sampai akhir transfer
+```
 
-Pada awal komunikasi, TCP meningkatkan congestion window secara bertahap. Setelah mendekati kapasitas jaringan, pertumbuhan window menjadi lebih lambat untuk mengurangi kemungkinan congestion.
+Perbedaan data hasil pengukuran dengan teori TCP ideal adalah grafik tidak sepenuhnya mulus. Pada praktiknya, pengiriman data dipengaruhi oleh kondisi jaringan nyata seperti variasi RTT, delay, dan waktu kedatangan ACK yang tidak selalu teratur.
 
----
+#### 4.10.3 Soal 2: Statistik dari Capture Sendiri
 
-# Kesimpulan
+**Soal:**
+Jawablah pertanyaan di atas untuk trace yang didapatkan ketika mengirimkan file dari komputer sendiri ke `gaia.cs.umass.edu`.
 
-Berdasarkan hasil praktikum, dapat diketahui bahwa TCP merupakan protokol transport yang menyediakan komunikasi andal melalui mekanisme acknowledgement, retransmission, flow control, dan congestion control.
+![Grafik Time Sequence Capture Sendiri](assets/grafikNo2.png)
 
-Proses komunikasi TCP dimulai dengan three-way handshake menggunakan segmen SYN, SYNACK, dan ACK. Selanjutnya data dikirim menggunakan sequence number dan dikontrol menggunakan acknowledgement.
+**Jawaban:**
+Berdasarkan grafik capture sendiri, terlihat bahwa transfer data dilakukan dari client menuju server `gaia.cs.umass.edu`. Grafik menunjukkan kenaikan sequence number hingga sekitar 150 KB, sehingga dapat disimpulkan bahwa grafik tersebut merupakan hasil pengiriman file `alice.txt`.
 
-Dari hasil analisis Wireshark juga terlihat bahwa TCP memiliki mekanisme congestion control seperti slow start dan congestion avoidance untuk menjaga stabilitas jaringan selama transfer data berlangsung.
+Fase **slow start** terlihat pada awal proses transfer, yaitu ketika sequence number meningkat dengan cepat. Pada bagian ini TCP mulai menaikkan congestion window untuk mempercepat pengiriman data.
 
-Dengan demikian, TCP sangat cocok digunakan pada layanan yang membutuhkan reliabilitas tinggi seperti HTTP, FTP, dan email.
+Fase slow start pada capture sendiri terjadi sekitar:
 
----
+```text
+0 – 1 detik
+```
 
-# Daftar Screenshot
+Setelah itu, grafik berubah menjadi lebih stabil dan cenderung linear. Bagian ini menunjukkan fase **congestion avoidance**, yaitu saat TCP tidak lagi menaikkan congestion window secara eksponensial, tetapi lebih perlahan untuk menghindari kemacetan jaringan.
 
-| File       | Keterangan                |
-| ---------- | ------------------------- |
-| asset1.png | Capture upload TCP        |
-| asset2.png | Filter TCP                |
-| asset3.png | Segmen SYN                |
-| asset4.png | Segmen SYNACK             |
-| asset5.png | HTTP POST                 |
-| asset6.png | RTT TCP                   |
-| asset7.png | Retransmission TCP        |
-| asset8.png | Time Sequence Graph       |
-| asset9.png | Grafik congestion control |
+Fase congestion avoidance terjadi sekitar:
+
+```text
+setelah 1 detik sampai akhir transfer
+```
+
+Grafik hasil capture sendiri tidak sepenuhnya sama dengan teori ideal TCP karena dipengaruhi oleh kondisi jaringan saat praktikum, seperti kecepatan internet, delay, variasi RTT, serta proses ACK dari server.
+
+## 5. Kesimpulan
+
+Berdasarkan hasil praktikum, protokol TCP memiliki mekanisme reliable transmission melalui sequence number dan acknowledgement. TCP juga menerapkan flow control dan congestion control untuk menjaga kestabilan jaringan. Dengan menggunakan Wireshark, proses pengiriman data, RTT, throughput, hingga congestion control dapat diamati secara detail.
