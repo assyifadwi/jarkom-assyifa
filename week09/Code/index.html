@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Python HTTP Server</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: "Segoe UI", Arial, sans-serif;
+            background:
+                radial-gradient(circle at top left, #8b5cf6, transparent 35%),
+                radial-gradient(circle at bottom right, #06b6d4, transparent 35%),
+                #0f172a;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card {
+            width: 90%;
+            max-width: 760px;
+            padding: 48px;
+            border-radius: 28px;
+            background: rgba(15, 23, 42, 0.78);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.45);
+            text-align: center;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 9px 18px;
+            border-radius: 999px;
+            background: rgba(34, 197, 94, 0.15);
+            color: #86efac;
+            font-weight: 700;
+            margin-bottom: 22px;
+        }
+
+        h1 {
+            font-size: 52px;
+            margin: 0 0 16px;
+            letter-spacing: -1px;
+        }
+
+        p {
+            font-size: 19px;
+            line-height: 1.7;
+            color: #cbd5e1;
+            margin: 0 auto 28px;
+            max-width: 580px;
+        }
+
+        .info {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 30px;
+        }
+
+        .box {
+            padding: 18px 22px;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.08);
+            min-width: 160px;
+        }
+
+        .box strong {
+            display: block;
+            font-size: 24px;
+            margin-bottom: 6px;
+        }
+
+        .box span {
+            color: #94a3b8;
+            font-size: 14px;
+        }
+
+        footer {
+            margin-top: 34px;
+            color: #94a3b8;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+    <main class="card">
+        <div class="badge">● Server Aktif</div>
+
+        <h1>HTTP Web Server</h1>
+
+        <p>
+            Halaman ini berhasil dikirim melalui server Python sederhana
+            menggunakan koneksi TCP dan protokol HTTP.
+        </p>
+
+        <div class="info">
+            <div class="box">
+                <strong>Python</strong>
+                <span>Socket Programming</span>
+            </div>
+
+            <div class="box">
+                <strong>HTTP</strong>
+                <span>GET Request</span>
+            </div>
+
+            <div class="box">
+                <strong>6789</strong>
+                <span>Server Port</span>
+            </div>
+        </div>
+
+        <footer>
+            Praktikum Jaringan Komputer • Week 09
+        </footer>
+    </main>
+
+</body>
+</html>
