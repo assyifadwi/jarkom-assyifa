@@ -24,9 +24,9 @@
 
 | Data | Information |
 |------|-------------|
-| 👩‍🎓 Name | Assyifa Dwi |
-| 🆔 NIM | 23XXXXXXXX |
-| 🏫 Class | TI / IF / D4 |
+| 👩‍🎓 Name | Assyifa Dwi Safitri |
+| 🆔 NIM | 103072400064 |
+| 🏫 Class | IF - 04 - 01 |
 | 📘 Course | Jaringan Komputer |
 
 </td>
