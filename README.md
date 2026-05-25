@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://capsule-render.vercel.app/api?type=venom&color=gradient&height=200&section=header&text=Jarkom%20Journey&fontSize=45&fontColor=ffffff&animation=twinkling"/>
+<img src="https://capsule-render.vercel.app/api?type=venom&color=gradient&height=200&section=header&text=Jarkom%20Journey&fontSize=45&fontColor=#000000&animation=twinkling"/>
 
 ### 🌐 Praktikum Jaringan Komputer
 
